@@ -1,0 +1,58 @@
+{
+    "name": "@jibaleysolution/ui",
+    "version": "0.1.1",
+    "description": "Jibaley ecosystem design system — Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel kit",
+    "type": "module",
+    "license": "MIT",
+    "bin": {
+        "jibaley-ui": "./bin/init.mjs"
+    },
+    "files": [
+        "dist",
+        "theme.css",
+        "bin",
+        "skills",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "llms.txt"
+    ],
+    "sideEffects": [
+        "*.css"
+    ],
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./theme.css": "./theme.css",
+        "./package.json": "./package.json"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "vite build",
+        "typecheck": "vue-tsc --noEmit",
+        "prepublishOnly": "npm run typecheck && npm run build"
+    },
+    "peerDependencies": {
+        "@inertiajs/vue3": "^2.0.0",
+        "@lucide/vue": "^1.25.0",
+        "reka-ui": "^2.10.0",
+        "vue": "^3.5.0"
+    },
+    "devDependencies": {
+        "@inertiajs/vue3": "^2.3.27",
+        "@lucide/vue": "^1.25.0",
+        "@vitejs/plugin-vue": "^6.0.8",
+        "reka-ui": "^2.10.1",
+        "typescript": "^5.9.3",
+        "vite": "^8.0.0",
+        "vite-plugin-dts": "^4.5.0",
+        "vue": "^3.5.40",
+        "vue-tsc": "^3.3.7"
+    }
+}

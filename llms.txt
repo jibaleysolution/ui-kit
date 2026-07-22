@@ -1,0 +1,13 @@
+# @jibaleysolution/ui
+
+> Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel component kit shared across the Jibaley ecosystem apps (jakil, jibaley-api, kitchen). Ships 31 components, 5 composables, and design tokens so admin-panel UI (cards, tables, badges, forms, modals, dialogs, pagination, toasts) is imported, not rewritten.
+
+## Docs
+
+- [AGENTS.md](./AGENTS.md): full component catalog, props/slots/emits, composition recipes, theming and RTL rules, translation contract. Byte-identical to CLAUDE.md. Read this first.
+- [skills/jibaley-ui/SKILL.md](./skills/jibaley-ui/SKILL.md): AI-agent skill — when to apply, import cheatsheet, common pitfalls.
+- [skills/jibaley-ui/references/components.md](./skills/jibaley-ui/references/components.md): the same full component/composable reference as AGENTS.md, standalone.
+- [skills/jibaley-ui/references/recipes.md](./skills/jibaley-ui/references/recipes.md): complete runnable page examples (index page, form page, modal, toast wiring).
+- [skills/jibaley-ui/references/theme.md](./skills/jibaley-ui/references/theme.md): design tokens, tone table, RTL utility rules.
+- [theme.css](./theme.css): the actual Tailwind 4 `@theme` tokens + `.card`/`.card-lift` classes, imported by consumers.
+- [README.md](./README.md): human quickstart (install, CSS import, `npx @jibaleysolution/ui init`).

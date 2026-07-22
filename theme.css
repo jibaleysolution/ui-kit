@@ -1,0 +1,140 @@
+/*
+ * @jibaley/ui — design tokens + component classes.
+ * Import AFTER tailwindcss in your app's CSS entry:
+ *
+ *   @import 'tailwindcss';
+ *   @import '@jibaley/ui/theme.css';
+ *
+ * `@source` below tells Tailwind 4 to scan this package's compiled output for
+ * utility classes — resolved relative to this file, so it needs no config in
+ * the consuming app. If it ever doesn't pick up classes, add in your app.css:
+ *   @source '../../node_modules/@jibaley/ui/dist';
+ */
+@source './dist';
+
+@theme {
+    /* Typography — Manrope (Latin) with Cairo (Arabic) in the fallback chain.
+       Bring your own font files (e.g. @fontsource-variable/manrope + /cairo). */
+    --font-sans: 'Manrope Variable', 'Cairo Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans--font-feature-settings: 'ss01', 'cv11';
+    --font-arabic: 'Cairo Variable', ui-sans-serif, system-ui, sans-serif;
+
+    /* Brand orange — reserved for actions, active state, gradient heroes */
+    --color-brand-50: #fff4ee;
+    --color-brand-100: #ffe4d5;
+    --color-brand-200: #ffc6aa;
+    --color-brand-300: #ff9d74;
+    --color-brand-400: #ff7038;
+    --color-brand-500: #fc4401;
+    --color-brand-600: #e03c00;
+    --color-brand-700: #b93200;
+    --color-brand-800: #932a06;
+    --color-brand-900: #78250b;
+
+    /* Surfaces & text */
+    --color-canvas: #f6f7f9;
+    --color-card: #ffffff;
+    --color-ink: #101828;
+    --color-muted: #667085;
+    --color-border: #e7eaee;
+    --color-sidebar: #0d1117;
+
+    /* Operator accents — deliberately not brand */
+    --color-airtel: #ed1c24;
+    --color-moov: #0ea5e9;
+    --color-epn: #0d9488;
+
+    /* Radius — 10px controls, 16px cards, 24px CTA bands */
+    --radius-md: 0.625rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+
+    /* Exactly two elevation levels */
+    --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
+    --shadow-card-lg: 0 4px 8px -2px rgb(16 24 40 / 0.06), 0 14px 28px -6px rgb(16 24 40 / 0.1);
+}
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        font-feature-settings: 'ss01', 'cv11';
+    }
+
+    html[dir='rtl'] body {
+        font-family: var(--font-arabic);
+    }
+
+    /* Brand 2px focus outline everywhere */
+    :where(a, button, input, select, textarea, [role='button'], [tabindex]):focus-visible {
+        outline: 2px solid var(--color-brand-500);
+        outline-offset: 2px;
+    }
+}
+
+@layer components {
+    /* Signature resting card; lifts on hover where the lift class is applied */
+    .card {
+        border-radius: var(--radius-2xl);
+        border: 1px solid var(--color-border);
+        background: var(--color-card);
+        box-shadow: var(--shadow-card);
+    }
+
+    .card-lift {
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .card-lift:hover {
+        box-shadow: var(--shadow-card-lg);
+    }
+}
+
+/* Component animation keyframes used by ConfirmDialog/Modal (fade-in) and
+   any consumer decorative motion (draw-in, blob-drift, spin-slow). */
+@keyframes draw-in {
+    from {
+        stroke-dashoffset: 1;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes blob-drift {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(4%, -6%, 0) scale(1.12);
+    }
+}
+
+@keyframes spin-slow {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
