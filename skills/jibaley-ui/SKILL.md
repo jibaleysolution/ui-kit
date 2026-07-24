@@ -21,7 +21,7 @@ metadata:
 import {
     Button, Card, Badge /* -> use StatusBadge */, StatusBadge, DataTable, SortableHeader,
     RowActions, DropdownMenu, ConfirmDialog, Modal, Sheet, Pagination, EmptyState, FilterBar, SearchInput,
-    FormShell, Label, Input, Textarea, Select, Toggle, Checkbox, RadioGroup, FieldError,
+    FormShell, Label, Input, Textarea, Select, Toggle, Checkbox, RadioGroup, DateField, DateRangeField, FieldError,
     PageHeader, StatCard, Tabs, Tooltip, Avatar, Alert, Spinner,
     KeyValue, Repeater, TagsInput, FileUpload, ColorField, CodeChip, DescriptionList,
     SegmentedControl, Skeleton, Toaster,

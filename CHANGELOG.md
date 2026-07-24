@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0
+
+### Added
+
+- **`DateField`** — native styled date / datetime-local / time / month input with an ISO-string v-model (maps straight to Laravel/DB); forced `dir="ltr"` so dates read correctly in RTL. Prefer it over `<Input type="date">`.
+- **`DateRangeField`** — from→to date range (two cross-bound `DateField`s) for report and filter pages; `{ start, end }` v-model.
+
+## 0.2.2
+
+- Added LICENSE (MIT), CONTRIBUTING.md, SECURITY.md, and package metadata (author, repository, homepage, bugs, keywords).
+
+## 0.2.1
+
+- Published via the GitHub Actions release workflow.
+
 ## 0.2.0
 
 ### Added

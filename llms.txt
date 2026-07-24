@@ -1,6 +1,6 @@
 # @jibaleysolution/ui
 
-> Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel component kit shared across the Jibaley ecosystem apps (jakil, jibaley-api, kitchen). Ships 44 components, 6 composables, and design tokens so admin-panel UI (cards, tables, badges, forms, modals, dialogs, dropdowns, tabs, sheets, tooltips, charts, pagination, toasts) is imported, not rewritten. Re-brandable at build time or per-tenant at runtime via useBrandColor().
+> Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel component kit shared across the Jibaley ecosystem apps (jakil, jibaley-api, kitchen). Ships 46 components, 6 composables, and design tokens so admin-panel UI (cards, tables, badges, forms, modals, dialogs, dropdowns, tabs, sheets, tooltips, charts, pagination, toasts) is imported, not rewritten. Re-brandable at build time or per-tenant at runtime via useBrandColor().
 
 ## Docs
 

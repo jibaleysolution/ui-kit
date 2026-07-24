@@ -11,6 +11,8 @@ import {
     StatCard,
     EmptyState,
     BarChart,
+    DateField,
+    DateRangeField,
     toneFor,
     brandRamp,
     useBrandColor,
@@ -89,6 +91,24 @@ describe('BarChart', () => {
     it('renders a bar per label', () => {
         const w = mount(BarChart, { props: { labels: ['a', 'b', 'c'], data: [1, 2, 3] } });
         expect(w.findAll('span').filter((s) => ['a', 'b', 'c'].includes(s.text()))).toHaveLength(3);
+    });
+});
+
+describe('DateField / DateRangeField', () => {
+    it('DateField renders a native date input bound via v-model', async () => {
+        const w = mount(DateField, { props: { modelValue: '' } });
+        const input = w.find('input');
+        expect(input.attributes('type')).toBe('date');
+        await input.setValue('2026-07-24');
+        expect(w.emitted('update:modelValue')![0]).toEqual(['2026-07-24']);
+    });
+
+    it('DateRangeField exposes two bound date inputs', () => {
+        const w = mount(DateRangeField, { props: { modelValue: { start: '2026-01-01', end: '2026-12-31' } } });
+        const inputs = w.findAll('input');
+        expect(inputs).toHaveLength(2);
+        expect((inputs[0].element as HTMLInputElement).value).toBe('2026-01-01');
+        expect((inputs[1].element as HTMLInputElement).value).toBe('2026-12-31');
     });
 });
 

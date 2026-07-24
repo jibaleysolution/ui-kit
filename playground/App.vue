@@ -4,8 +4,8 @@ import {
     Button, Card, StatusBadge, Alert, Spinner, Checkbox, RadioGroup, Toggle, Avatar,
     Tabs, Tooltip, Modal, Sheet, ConfirmDialog, Input, Select, Textarea, Label,
     StatCard, EmptyState, SegmentedControl, TagsInput, DataTable, SortableHeader,
-    DropdownMenu, BarChart, HBarChart, DonutChart, TrendChart,
-    useBrandColor, type Tone,
+    DropdownMenu, DateField, DateRangeField, BarChart, HBarChart, DonutChart, TrendChart,
+    useBrandColor, type Tone, type DateRange,
 } from '@jibaleysolution/ui';
 import { Eye, Pencil, Trash2, ShoppingBag } from '@lucide/vue';
 
@@ -27,6 +27,8 @@ const on = ref(true);
 const tags = ref(['vue', 'inertia']);
 const tab = ref('one');
 const seg = ref('list');
+const date = ref('2026-07-24');
+const range = ref<DateRange>({ start: '2026-07-01', end: '2026-07-31' });
 const modalOpen = ref(false);
 const sheetOpen = ref(false);
 const confirmOpen = ref(false);
@@ -126,6 +128,14 @@ const menuItems = [
                             <Toggle v-model="on" />
                         </div>
                         <RadioGroup v-model="radio" :options="[{ value: 'a', label: 'Option A' }, { value: 'b', label: 'Option B' }]" />
+                        <div>
+                            <Label for="d">Date</Label>
+                            <DateField id="d" v-model="date" type="datetime-local" />
+                        </div>
+                        <div>
+                            <Label>Date range</Label>
+                            <DateRangeField v-model="range" />
+                        </div>
                         <div class="sm:col-span-2">
                             <Label>Tags</Label>
                             <TagsInput v-model="tags" :suggestions="['react', 'svelte']" />
