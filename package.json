@@ -1,6 +1,6 @@
 {
     "name": "@jibaleysolution/ui",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Jibaley ecosystem design system — Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel kit",
     "type": "module",
     "license": "MIT",
