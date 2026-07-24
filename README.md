@@ -61,3 +61,15 @@ npm run build
 ```
 
 `src/` holds the source (components, composables, lib). `theme.css` is static and shipped as-is. `npm run build` compiles `src/` to `dist/` (ESM + per-component `.d.ts`); Vue, Inertia, reka-ui, and `@lucide/vue` are external — they're expected to be provided by the consuming app.
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the dev setup, design rules (tokens-only, light-mode, RTL-first), how to add a component, and the release flow.
+
+## Contact
+
+Questions, issues, or security reports: **engineering@jibaley.com** (security: see [SECURITY.md](./SECURITY.md), please don't file public issues for vulnerabilities).
+
+## License
+
+[MIT](./LICENSE) © Jibaley

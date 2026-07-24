@@ -4,6 +4,28 @@
     "description": "Jibaley ecosystem design system — Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel kit",
     "type": "module",
     "license": "MIT",
+    "author": "Jibaley <engineering@jibaley.com>",
+    "homepage": "https://jibaleysolution.github.io/ui-kit/",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jibaleysolution/ui-kit.git"
+    },
+    "bugs": {
+        "url": "https://github.com/jibaleysolution/ui-kit/issues",
+        "email": "engineering@jibaley.com"
+    },
+    "keywords": [
+        "vue",
+        "vue3",
+        "inertia",
+        "reka-ui",
+        "tailwindcss",
+        "design-system",
+        "component-library",
+        "ui-kit",
+        "admin",
+        "rtl"
+    ],
     "bin": {
         "jibaley-ui": "./bin/init.mjs"
     },
