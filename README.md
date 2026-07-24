@@ -4,6 +4,8 @@ Jibaley ecosystem design system — a Vue 3 + Inertia + reka-ui + Tailwind 4 com
 
 44 components (Card, DataTable, StatusBadge, RowActions, DropdownMenu, Tabs, Sheet, Avatar, Alert, Tooltip, Checkbox, RadioGroup, Spinner, form fields, Modal, ConfirmDialog, Pagination, Toaster, 4 SVG charts, and more), 6 composables (`useToast`, `useTrans`, `useClipboard`, `useDebounceFn`, `useDataTable`, `useBrandColor`), and the shared design tokens (`theme.css`). Re-brandable — override the brand ramp statically or per-tenant at runtime.
 
+**▶ Live playground:** [jibaleysolution.github.io/ui-kit](https://jibaleysolution.github.io/ui-kit/) — browse every component with a live brand-color switcher and RTL toggle. Run it locally with `npm run play`.
+
 ## Install
 
 ```bash
