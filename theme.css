@@ -1,14 +1,17 @@
 /*
- * @jibaley/ui — design tokens + component classes.
+ * @jibaleysolution/ui — design tokens + component classes.
  * Import AFTER tailwindcss in your app's CSS entry:
  *
  *   @import 'tailwindcss';
- *   @import '@jibaley/ui/theme.css';
+ *   @import '@jibaleysolution/ui/theme.css';
  *
  * `@source` below tells Tailwind 4 to scan this package's compiled output for
  * utility classes — resolved relative to this file, so it needs no config in
  * the consuming app. If it ever doesn't pick up classes, add in your app.css:
- *   @source '../../node_modules/@jibaley/ui/dist';
+ *   @source '../../node_modules/@jibaleysolution/ui/dist';
+ *
+ * To re-brand: override --color-brand-50…900 in your own @theme block (static),
+ * or call useBrandColor(hex) from @jibaleysolution/ui at runtime (per-tenant).
  */
 @source './dist';
 
@@ -126,6 +129,43 @@
 @keyframes spin-slow {
     to {
         transform: rotate(360deg);
+    }
+}
+
+/* Sheet/Drawer edge-slide (physical direction, resolved RTL-aware in the component) */
+@keyframes slide-in-left {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slide-in-right {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slide-in-top {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slide-in-bottom {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
     }
 }
 

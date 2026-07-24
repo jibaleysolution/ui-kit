@@ -1,6 +1,6 @@
 {
     "name": "@jibaleysolution/ui",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "description": "Jibaley ecosystem design system — Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel kit",
     "type": "module",
     "license": "MIT",
@@ -36,7 +36,10 @@
     "scripts": {
         "build": "vite build",
         "typecheck": "vue-tsc --noEmit",
-        "prepublishOnly": "npm run typecheck && npm run build"
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "play": "vite --config playground/vite.config.ts",
+        "prepublishOnly": "npm run typecheck && npm run test && npm run build"
     },
     "peerDependencies": {
         "@inertiajs/vue3": "^2.0.0",
@@ -47,11 +50,16 @@
     "devDependencies": {
         "@inertiajs/vue3": "^2.3.27",
         "@lucide/vue": "^1.25.0",
+        "@tailwindcss/vite": "^4.3.3",
         "@vitejs/plugin-vue": "^6.0.8",
+        "@vue/test-utils": "^2.4.11",
+        "jsdom": "^29.1.1",
         "reka-ui": "^2.10.1",
+        "tailwindcss": "^4.3.3",
         "typescript": "^5.9.3",
         "vite": "^8.0.0",
         "vite-plugin-dts": "^4.5.0",
+        "vitest": "^4.1.10",
         "vue": "^3.5.40",
         "vue-tsc": "^3.3.7"
     }

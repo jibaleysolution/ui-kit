@@ -44,6 +44,20 @@ type Tone = 'green' | 'red' | 'amber' | 'sky' | 'teal' | 'neutral';
 
 Keep the actual `status string → Tone` mapping in your app (e.g. `resources/js/lib/badges.ts`) and pass it through `toneFor(map, status)`. Don't hardcode tone-to-color logic outside `StatusBadge`.
 
+## Re-branding (change the brand color)
+
+The orange ramp is only a default. Every brand-filled element (`Button` primary, `Toggle`, active `Pagination`/`SegmentedControl`, charts, focus ring) reads `--color-brand-*`, so overriding the ramp re-themes the whole kit.
+
+- **Static, one brand per app** — after the theme import, in your CSS entry:
+  ```css
+  @import 'tailwindcss';
+  @import '@jibaleysolution/ui/theme.css';
+  @theme { --color-brand-500: #2563eb; /* + 50…900 */ }
+  ```
+- **Runtime, per-tenant white-label** — `useBrandColor(hex)` derives the full 50→900 ramp from one hex and injects it onto `:root`; call once on boot (e.g. `useBrandColor(usePage().props.branding?.brand_color)`). `brandRamp(hex)` returns the same values purely for SSR/inline `<style>`.
+
+Don't hardcode hex brand values in components — always use the `brand-*` scale so re-branding works.
+
 ## Light mode only
 
 There is no dark theme. Don't add `dark:` Tailwind variants to any component or consuming page — they will be inert at best and inconsistent at worst.

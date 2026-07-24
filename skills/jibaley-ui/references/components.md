@@ -37,6 +37,19 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | **Textarea** | `id?`, `placeholder?`, `rows? = 4`, `required?`, `dir?: 'ltr'\|'rtl'`, `invalid?`, `modelValue: string \| number` (v-model) | — | — | Mirrors `Input`'s API and invalid-state styling. |
 | **Toaster** | — | — | — | Mount once per app. Calls `useToast().wireFlash()` internally. |
 | **Toggle** | `id?`, `modelValue: boolean = false` (v-model) | — | — | Switch (`role="switch"`), RTL-aware knob direction. |
+| **Alert** | `tone?: 'info'\|'success'\|'warning'\|'danger' = 'info'`, `title?`, `dismissible? = false` | default | — | Inline persistent banner (distinct from transient `Toaster`). |
+| **Avatar** | `src?: string \| null`, `name?`, `size?: 'sm'\|'md'\|'lg' = 'md'` | — | — | Image with initials fallback from `name`. |
+| **Checkbox** | `id?`, `disabled?`, `modelValue: boolean = false` (v-model) | default (label) | — | Single checkbox + label. Multi-select lists; use `Toggle` for on/off settings. |
+| **DropdownMenu** | `items: MenuItem[]`, `align?: 'start'\|'end' = 'end'` | `#trigger` | `select` | Overflow/action menu. `MenuItem = { label; icon?; href?; danger?; separatorBefore? }`. Use for **>3** actions; `RowActions` for ≤3. |
+| **RadioGroup** | `options: { value; label }[]`, `disabled?`, `modelValue: string` (v-model) | — | — | Vertical radio list. |
+| **Sheet** | `title?`, `description?`, `side?: 'start'\|'end'\|'top'\|'bottom' = 'end'`, `open: boolean` (v-model) | default, `#footer` | — | Edge drawer (RTL-aware `start`/`end`); same slots as `Modal`. |
+| **Spinner** | `size?: 'sm'\|'md'\|'lg' = 'md'` | — | — | Standalone brand spinner. |
+| **Tabs** | `tabs: { value; label }[]`, `modelValue: string` (v-model) | one slot per `tab.value` | — | Underline tab bar; panel per named slot. |
+| **Tooltip** | `content?`, `side?: 'top'\|'right'\|'bottom'\|'left' = 'top'`, `delay? = 200` | default (trigger), `#content` | — | Hover/focus tooltip. |
+| **BarChart** | `labels: string[]`, `data: number[]`, `color? = brand`, `accentPeak? = false` | — | — | Vertical SVG bars. |
+| **HBarChart** | `labels: string[]`, `data: number[]`, `format?` | — | — | Horizontal ranked bars. |
+| **DonutChart** | `labels: string[]`, `data: number[]`, `donut? = true`, `format?` | — | — | Donut/pie + legend. |
+| **TrendChart** | `series: { label; value }[]`, `title?` | — | — | Line + area trend. |
 
 ## Composables
 
@@ -47,6 +60,8 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | `useClipboard(resetAfter = 1500)` | `{ copied, copy(text) }` | Used internally by `CodeChip`. |
 | `useDebounceFn(fn, delay = 300)` | debounced `fn` | Used internally by `SearchInput`. |
 | `useDataTable(initialFilters?)` | `{ filters, onSearch(value), sortBy(column), reload() }` | Server-driven search/sort — reloads current pathname via Inertia `router.get`, no Ziggy needed. |
+| `useBrandColor(hex, target?)` | applies a runtime brand ramp | Injects `--color-brand-50…900` derived from `hex` onto `:root`/`target`. Per-tenant white-label; no-op on empty/SSR. |
+| `brandRamp(hex)` | `Record<'--color-brand-*', string>` | Pure ramp values (CSS `color-mix()` strings) for SSR/inline styles. |
 
 ## `lib` exports
 

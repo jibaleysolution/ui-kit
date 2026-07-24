@@ -55,6 +55,24 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | **Toaster** | — | — | — | Mount **once** per app (e.g. in your root layout). Calls `useToast().wireFlash()` internally to mirror server flash toasts. |
 | **Toggle** | `id?`, `modelValue: boolean = false` (v-model) | — | — | Switch (`role="switch"`), RTL-aware knob direction. |
 | **FilterBar** | — | default | — | Card row wrapper for filter controls (search input, selects) on index/report pages. |
+| **Alert** | `tone?: 'info'\|'success'\|'warning'\|'danger' = 'info'`, `title?: string`, `dismissible? = false` | default (body) | — | Inline banner. **Not** a toast — use for persistent page-level notices; `Toaster` is for transient flash. |
+| **Avatar** | `src?: string \| null`, `name?: string`, `size?: 'sm'\|'md'\|'lg' = 'md'` | — | — | Image with initials fallback derived from `name`. |
+| **Checkbox** | `id?`, `disabled?`, `modelValue: boolean = false` (v-model) | default (label) | — | Single checkbox with a clickable label. For on/off settings prefer `Toggle`; for multi-select lists use `Checkbox`. |
+| **DropdownMenu** | `items: MenuItem[]`, `align?: 'start'\|'end' = 'end'` | `#trigger` | `select` | Overflow/action menu (reka-ui). `MenuItem = { label; icon?; href?; danger?; separatorBefore? }`. Use for **>3** row actions; for ≤3 use `RowActions`. Default trigger is a ⋯ button. |
+| **RadioGroup** | `options: { value: string; label: string }[]`, `disabled?`, `modelValue: string` (v-model) | — | — | Vertical radio list. |
+| **Sheet** | `title?`, `description?`, `side?: 'start'\|'end'\|'top'\|'bottom' = 'end'`, `open: boolean` (v-model) | default, `#footer` | — | Edge-docked drawer (RTL-aware `start`/`end`). Same slot API as `Modal`, slides from an edge instead of centering. |
+| **Spinner** | `size?: 'sm'\|'md'\|'lg' = 'md'` | — | — | Standalone brand-colored spinner (the same one `Button`'s `loading` uses). |
+| **Tabs** | `tabs: { value: string; label: string }[]`, `modelValue: string` (v-model) | one named slot per `tab.value` | — | Underline tab bar; render each panel in a slot named after its `value`. |
+| **Tooltip** | `content?: string`, `side?: 'top'\|'right'\|'bottom'\|'left' = 'top'`, `delay? = 200` | default (trigger), `#content` | — | Hover/focus tooltip (reka-ui). Wrap the trigger in the default slot. |
+
+### Charts (dependency-free SVG; default series color follows `--color-brand-500`)
+
+| Component | Props | Notes |
+|---|---|---|
+| **BarChart** | `labels: string[]`, `data: number[]`, `color? = var(--color-brand-500)`, `accentPeak? = false` | Vertical bars; `accentPeak` reddens the tallest bar. |
+| **HBarChart** | `labels: string[]`, `data: number[]`, `format?: (v) => string\|number` | Horizontal ranked bars with a palette. |
+| **DonutChart** | `labels: string[]`, `data: number[]`, `donut? = true`, `format?` | Donut/pie with a legend. Set `donut=false` for a full pie. |
+| **TrendChart** | `series: { label: string; value: number }[]`, `title?: string` | Line + filled-area sparkline-style trend. |
 
 ### Composables
 
@@ -65,6 +83,8 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | `useClipboard(resetAfter = 1500)` | `{ copied, copy(text) }` | Used internally by `CodeChip`; also usable standalone. |
 | `useDebounceFn(fn, delay = 300)` | returns a debounced version of `fn` | Used internally by `SearchInput`. |
 | `useDataTable(initialFilters?)` | `{ filters, onSearch(value), sortBy(column), reload() }` | Server-driven search/sort for an index page — reloads the **current pathname** via Inertia `router.get` (no Ziggy `route()` needed). Pair with `SearchInput`, `SortableHeader`, `Pagination`. |
+| `useBrandColor(hex, target?)` | applies a brand ramp at runtime | Injects `--color-brand-50…900` derived from a single `hex` onto `:root` (or `target`). Call once on boot for per-tenant white-labeling. No-op on empty `hex`/SSR. See **Theming**. |
+| `brandRamp(hex)` | `Record<'--color-brand-*', string>` | Pure — returns the 10 ramp values as CSS `color-mix()` strings (for SSR/inline `<style>` without touching the DOM). |
 
 ### `lib` exports
 
@@ -194,6 +214,26 @@ Server side, flash a toast the shape `{ type: 'success'|'error'|'info', message:
 - Radius scale: `--radius-md` (0.625rem, controls), `--radius-2xl` (1rem, `.card`), `--radius-3xl` (1.5rem, CTA bands).
 - **Light mode only** — there is no dark theme in this system. Don't add `dark:` variants to kit-consuming code.
 - **RTL is first-class.** Use logical Tailwind utilities (`ps-`/`pe-`, `ms-`/`me-`, `start-`/`end-`, `text-start`/`text-end`) instead of physical `pl-`/`pr-`/`left-`/`right-`. Directional icons (arrows, chevrons used as "back") need `rtl:rotate-180`. Set `dir` on the document root from the current locale.
+
+## Re-branding (change the brand color)
+
+The default orange is just a default. To ship a different brand color, or to white-label per tenant, override the `--color-brand-*` ramp — every component that fills with brand (`Button` primary, `Toggle`, active `Pagination`/`SegmentedControl`, charts) follows automatically.
+
+- **Static (one brand for the whole app)** — redefine the ramp in your CSS entry, after the theme import:
+  ```css
+  @import 'tailwindcss';
+  @import '@jibaleysolution/ui/theme.css';
+  @theme {
+      --color-brand-500: #2563eb; /* + 50…900 for the full ramp */
+  }
+  ```
+- **Runtime (per-tenant white-label)** — call `useBrandColor(hex)` once on boot with a hex from the server. It derives the whole 50→900 ramp from that one color and injects it onto `:root`, so tinted elements re-theme live with no rebuild:
+  ```ts
+  import { useBrandColor } from '@jibaleysolution/ui';
+  import { usePage } from '@inertiajs/vue3';
+  // e.g. in your root layout setup:
+  useBrandColor(usePage().props.branding?.brand_color); // no-op if absent
+  ```
 
 ## Translation contract
 

@@ -20,17 +20,19 @@ metadata:
 ```ts
 import {
     Button, Card, Badge /* -> use StatusBadge */, StatusBadge, DataTable, SortableHeader,
-    RowActions, ConfirmDialog, Modal, Pagination, EmptyState, FilterBar, SearchInput,
-    FormShell, Label, Input, Textarea, Select, Toggle, FieldError, PageHeader, StatCard,
+    RowActions, DropdownMenu, ConfirmDialog, Modal, Sheet, Pagination, EmptyState, FilterBar, SearchInput,
+    FormShell, Label, Input, Textarea, Select, Toggle, Checkbox, RadioGroup, FieldError,
+    PageHeader, StatCard, Tabs, Tooltip, Avatar, Alert, Spinner,
     KeyValue, Repeater, TagsInput, FileUpload, ColorField, CodeChip, DescriptionList,
     SegmentedControl, Skeleton, Toaster,
-    useToast, useTrans, useDataTable, useClipboard, useDebounceFn,
+    BarChart, HBarChart, DonutChart, TrendChart,
+    useToast, useTrans, useDataTable, useClipboard, useDebounceFn, useBrandColor,
     toneFor,
 } from '@jibaleysolution/ui';
-import type { Tone, Paginated, PaginatedMeta, FlashToast, ToastType } from '@jibaleysolution/ui';
+import type { Tone, Paginated, PaginatedMeta, FlashToast, ToastType, MenuItem } from '@jibaleysolution/ui';
 ```
 
-There is no exported component literally named `Badge` — status pills are `StatusBadge`.
+There is no exported component literally named `Badge` — status pills are `StatusBadge`. For row actions: ≤3 → `RowActions` (inline icons); >3 → `DropdownMenu` (overflow menu). To re-brand, override `--color-brand-*` or call `useBrandColor(hex)` — see `references/theme.md`.
 
 ## Recipes (short form — full versions in `references/recipes.md`)
 

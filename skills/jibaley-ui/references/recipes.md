@@ -128,6 +128,44 @@ import { Toaster } from '@jibaleysolution/ui';
 
 Server side, flash a toast shaped `{ type: 'success'|'error'|'info', message: string }` under the `toast` flash key — e.g. in Laravel: `session()->flash('toast', ['type' => 'success', 'message' => '...'])`, surfaced to Inertia as `page.props.flash.toast`.
 
+## Per-tenant brand color (runtime white-label)
+
+Apply a tenant's brand color once on boot; every brand-filled component re-themes with no rebuild.
+
+```vue
+<script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
+import { useBrandColor } from '@jibaleysolution/ui';
+
+// In your root layout setup — no-op when branding is absent.
+useBrandColor(usePage().props.branding?.brand_color);
+</script>
+```
+
+For a fixed single-brand app instead, override the ramp statically in CSS — see `references/theme.md`.
+
+## Overflow row actions (>3)
+
+`RowActions` covers view/edit/delete. When a row needs more, use `DropdownMenu` in the trailing cell instead:
+
+```vue
+<script setup lang="ts">
+import { DropdownMenu } from '@jibaleysolution/ui';
+import { Eye, Pencil, Ban, Trash2 } from '@lucide/vue';
+
+const menu = (row) => [
+    { label: 'View', icon: Eye, href: route('admin.orders.show', row.id) },
+    { label: 'Edit', icon: Pencil, href: route('admin.orders.edit', row.id) },
+    { label: 'Suspend', icon: Ban, separatorBefore: true },
+    { label: 'Delete', icon: Trash2, danger: true },
+];
+</script>
+
+<template>
+    <td class="px-4 py-3"><DropdownMenu :items="menu(row)" @select="onSelect($event, row)" /></td>
+</template>
+```
+
 ## Decision: Modal vs. ConfirmDialog vs. raw Dialog primitives
 
 - **Deleting/destructive/simple yes-no** → `ConfirmDialog` (built-in Cancel/Confirm, `tone="danger"`).
