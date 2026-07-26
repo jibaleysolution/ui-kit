@@ -21,7 +21,8 @@ metadata:
 import {
     Button, Card, Badge /* -> use StatusBadge */, StatusBadge, DataTable, SortableHeader,
     RowActions, DropdownMenu, ConfirmDialog, Modal, Sheet, Pagination, EmptyState, FilterBar, SearchInput,
-    FormShell, Label, Input, Textarea, Select, Toggle, Checkbox, RadioGroup, DateField, DateRangeField, FieldError,
+    FormShell, Label, Input, Textarea, Select, Toggle, Checkbox, RadioGroup, DateField, DateRangeField,
+    TranslatableField, FieldError,
     PageHeader, StatCard, Tabs, Tooltip, Avatar, Alert, Spinner,
     KeyValue, Repeater, TagsInput, FileUpload, ColorField, CodeChip, DescriptionList,
     SegmentedControl, Skeleton, Toaster,
@@ -40,6 +41,7 @@ There is no exported component literally named `Badge` — status pills are `Sta
 - **Form page**: `FormShell` (layout) → `Card` → `Label` + `Input`/`Select`/`Textarea`/`Toggle`/`FileUpload`/`TagsInput`/`KeyValue` bound to Inertia `useForm()`, each paired with `FieldError :message="form.errors.x"` and `:invalid="!!form.errors.x"` on the field.
 - **Modal vs. ConfirmDialog**: destructive/yes-no → `ConfirmDialog`. Anything richer (a form, details) → `Modal` with its `#footer` slot. Neither fits → the re-exported raw reka-ui `Dialog*` primitives.
 - **Toasts**: mount `<Toaster />` once in the root layout; server flashes `{ type, message }` under the `toast` flash key.
+- **Multi-language JSON column** (`{"fr":"…","ar":"…"}`): one `TranslatableField` with `name` as the **dotted path prefix** and `:errors="form.errors"` (the whole bag). Inside a `Repeater`, interpolate the runtime index: `` :name="`option_groups.${gi}.name`" ``.
 
 ## Common Pitfalls
 
@@ -50,6 +52,8 @@ There is no exported component literally named `Badge` — status pills are `Sta
 - Calling `alert()`/`confirm()` instead of `useToast()` / `ConfirmDialog`.
 - Adding `dark:` variants — this design system is light-mode only.
 - Building a per-row dropdown menu for row actions — the established pattern is inline icon buttons via `RowActions`, not a `DropdownMenu`.
+- Hand-rolling a translatable field as two `Input`s bound to `form.name.fr` / `form.name.ar` — use `TranslatableField`, which also keeps every locale key present in the submitted JSON.
+- Calling `JSON.stringify` on a translations object, or adding `transform()` to "fix" it — Inertia already sends a nested object, and multipart serializes it to `name[fr]` which PHP re-parses into an array. Stringifying breaks the `name.fr` validation rules.
 - Putting domain status→tone maps (e.g. `orderStatusTone`) inside the kit — those stay in the consuming app; only `toneFor()` and the `Tone` type live in `@jibaleysolution/ui`.
 
 See `references/theme.md` for the full token list and RTL rules, and `references/recipes.md` for complete, runnable page examples.

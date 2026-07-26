@@ -13,9 +13,12 @@ import {
     BarChart,
     DateField,
     DateRangeField,
+    Tabs,
+    TranslatableField,
     toneFor,
     brandRamp,
     useBrandColor,
+    dirForLocale,
 } from '../src/index';
 
 describe('Button', () => {
@@ -109,6 +112,109 @@ describe('DateField / DateRangeField', () => {
         expect(inputs).toHaveLength(2);
         expect((inputs[0].element as HTMLInputElement).value).toBe('2026-01-01');
         expect((inputs[1].element as HTMLInputElement).value).toBe('2026-12-31');
+    });
+});
+
+describe('TranslatableField', () => {
+    it('emits the full locale map on every write (all keys, empty strings)', async () => {
+        const w = mount(TranslatableField, {
+            props: { name: 'name', layout: 'grid', locales: ['fr', 'ar', 'en'], modelValue: { fr: 'a' } },
+        });
+        await w.findAll('input')[1].setValue('x');
+        expect(w.emitted('update:modelValue')![0][0]).toEqual({ fr: 'a', ar: 'x', en: '' });
+    });
+
+    it('preserves locales stored on the value but not configured', async () => {
+        const w = mount(TranslatableField, {
+            props: { name: 'name', layout: 'grid', locales: ['fr', 'ar'], modelValue: { fr: 'a', en: 'keep' } },
+        });
+        await w.findAll('input')[0].setValue('b');
+        expect(w.emitted('update:modelValue')![0][0]).toEqual({ fr: 'b', ar: '', en: 'keep' });
+    });
+
+    it('resolves errors through the dotted path, including nested indices', () => {
+        const w = mount(TranslatableField, {
+            props: {
+                name: 'option_groups.0.name',
+                layout: 'grid',
+                errors: { 'option_groups.0.name.fr': 'Le nom est requis' },
+            },
+        });
+        expect(w.text()).toContain('Le nom est requis');
+    });
+
+    it('marks only the erroring tab with a dot', () => {
+        const w = mount(TranslatableField, {
+            props: { name: 'name', errors: { 'name.ar': 'requis' } },
+        });
+        const triggers = w.findAll('[role="tab"]');
+        const fr = triggers.find((t) => t.text().startsWith('FR'))!;
+        const ar = triggers.find((t) => t.text().startsWith('AR'))!;
+        expect(ar.html()).toContain('bg-red-500');
+        expect(fr.html()).not.toContain('bg-red-500');
+    });
+
+    it('applies the required attribute only to the required locale', () => {
+        const marked = mount(TranslatableField, {
+            props: {
+                name: 'name',
+                label: 'Nom',
+                layout: 'grid',
+                locales: ['fr', 'ar'],
+                required: true,
+                requiredLocale: 'ar',
+            },
+        });
+        const inputs = marked.findAll('input');
+        expect(inputs[0].attributes('required')).toBeUndefined();
+        expect(inputs[1].attributes('required')).toBeDefined();
+        expect(marked.text()).toContain('*');
+
+        const bare = mount(TranslatableField, {
+            props: { name: 'name', layout: 'grid', locales: ['fr', 'ar'] },
+        });
+        expect(bare.findAll('input').every((i) => i.attributes('required') === undefined)).toBe(true);
+        expect(bare.text()).not.toContain('*');
+    });
+
+    it('renders one control per locale in grid layout', () => {
+        const text = mount(TranslatableField, {
+            props: { name: 'name', layout: 'grid', locales: ['fr', 'ar', 'en'] },
+        });
+        expect(text.findAll('input')).toHaveLength(3);
+
+        const multi = mount(TranslatableField, {
+            props: { name: 'bio', layout: 'grid', locales: ['fr', 'ar'], multiline: true },
+        });
+        expect(multi.findAll('textarea')).toHaveLength(2);
+    });
+
+    it('gives RTL locales dir="rtl"', () => {
+        const w = mount(TranslatableField, { props: { name: 'name', layout: 'grid', locales: ['fr', 'ar'] } });
+        const inputs = w.findAll('input');
+        expect(inputs[0].attributes('dir')).toBe('ltr');
+        expect(inputs[1].attributes('dir')).toBe('rtl');
+    });
+});
+
+describe('dirForLocale', () => {
+    it('detects RTL by primary subtag', () => {
+        for (const code of ['ar', 'ar-MA', 'he', 'fa', 'ur', 'AR']) {
+            expect(dirForLocale(code)).toBe('rtl');
+        }
+        for (const code of ['fr', 'en', 'fr-CA', 'tr']) {
+            expect(dirForLocale(code)).toBe('ltr');
+        }
+    });
+});
+
+describe('Tabs', () => {
+    it('still renders plain labels without the tab-label slot', () => {
+        const w = mount(Tabs, {
+            props: { tabs: [{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Beta' }], modelValue: 'a' },
+        });
+        expect(w.text()).toContain('Alpha');
+        expect(w.text()).toContain('Beta');
     });
 });
 

@@ -17,9 +17,11 @@ const model = defineModel<string>();
                 v-for="tab in tabs"
                 :key="tab.value"
                 :value="tab.value"
-                class="-mb-px border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink data-[state=active]:border-brand-500 data-[state=active]:text-ink"
+                class="-mb-px inline-flex items-center gap-1.5 border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-ink data-[state=active]:border-brand-500 data-[state=active]:text-ink"
             >
-                {{ tab.label }}
+                <!-- Scoped slot lets a consumer decorate the label (error dot, count
+                     badge…). The fallback keeps plain-label usage unchanged. -->
+                <slot name="tab-label" :tab="tab" :active="model === tab.value">{{ tab.label }}</slot>
             </TabsTrigger>
         </TabsList>
 

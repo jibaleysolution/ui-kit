@@ -166,6 +166,66 @@ const menu = (row) => [
 </template>
 ```
 
+## Multi-language JSON field
+
+Laravel side — a `json` column, an array cast, and dotted rules:
+
+```php
+// migration
+$table->json('name');            // locale => value
+
+// model
+protected function casts(): array { return ['name' => 'array']; }
+
+// FormRequest
+'name'    => ['required', 'array'],
+'name.fr' => ['required', 'string', 'max:120'],
+'name.ar' => ['nullable', 'string', 'max:120'],
+```
+
+Vue side — one component, tabs per locale:
+
+```vue
+<script setup lang="ts">
+import { useForm } from '@inertiajs/vue3';
+import { TranslatableField, Button } from '@jibaleysolution/ui';
+
+const form = useForm({ name: { fr: '', ar: '' } });
+</script>
+
+<template>
+    <TranslatableField
+        v-model="form.name"
+        name="name"
+        label="Nom"
+        :errors="form.errors"
+        required
+        required-locale="fr"
+    />
+</template>
+```
+
+`required-locale` is passed explicitly because the backend always requires `fr`; the default follows the viewer's UI locale. Submit as-is — **no `JSON.stringify`, no `transform()`**.
+
+### Inside a Repeater (nested paths)
+
+Laravel validates `option_groups.*.name.fr`, and errors come back with concrete indices (`option_groups.0.name.fr`). Interpolate the runtime index into `name`:
+
+```vue
+<Repeater v-model="form.option_groups" :new-item="() => ({ name: { fr: '', ar: '' } })">
+    <template #item="{ item, index }">
+        <TranslatableField
+            v-model="item.name"
+            :name="`option_groups.${index}.name`"
+            label="Nom"
+            :errors="form.errors"
+            required
+            required-locale="fr"
+        />
+    </template>
+</Repeater>
+```
+
 ## Decision: Modal vs. ConfirmDialog vs. raw Dialog primitives
 
 - **Deleting/destructive/simple yes-no** → `ConfirmDialog` (built-in Cancel/Confirm, `tone="danger"`).

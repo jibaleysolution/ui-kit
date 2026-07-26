@@ -37,7 +37,7 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | **FieldError** | `message?: string` | — | — | Renders nothing when `message` is falsy. Feed directly from `form.errors.<field>`. |
 | **FileUpload** | `id?: string`, `currentUrl?: string \| null`, `accept? = 'image/*'`, `hint?: string`, `modelValue: File \| null` (v-model) | default (button label override) | — | Avatar-style drag/click upload with local object-URL preview + clear button. |
 | **FormShell** | `title: string`, `description?: string`, `backHref?: string`, `backLabel?: string` | `#aside`, default | — | Two-column responsive form layout (sticky title/description aside + form). Layout only — no validation logic. |
-| **Input** | `id?`, `type? = 'text'`, `placeholder?`, `autocomplete?`, `required?`, `dir?: 'ltr'\|'rtl'`, `invalid?: boolean`, `modelValue: string \| number` (v-model) | — | — | `invalid` swaps the border red and sets `aria-invalid`. Pair with `Label` + `FieldError`. |
+| **Input** | `id?`, `type? = 'text'`, `placeholder?`, `autocomplete?`, `required?`, `disabled?`, `dir?: 'ltr'\|'rtl'`, `invalid?: boolean`, `modelValue: string \| number` (v-model) | — | — | `invalid` swaps the border red and sets `aria-invalid`. Pair with `Label` + `FieldError`. |
 | **KeyValue** | `keyLabel?`, `valueLabel?`, `addLabel? = 'Add'`, `modelValue: Record<string,string> = {}` (v-model) | — | — | Add/remove repeater of key/value text rows, backed by a plain object. |
 | **Label** | `for?: string` | default | — | Plain `<label>`. |
 | **Modal** | `title?: string`, `description?: string`, `size?: 'sm'\|'md'\|'lg'\|'xl' = 'md'`, `open: boolean` (v-model) | default, `#footer` | — | **Generic** dialog — use for anything that isn't a simple confirm (multi-field forms in a modal, detail views). Has its own close (X). For destructive confirmations, prefer `ConfirmDialog`. |
@@ -53,7 +53,7 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | **StatCard** | `label: string`, `value: string \| number`, `description?: string`, `icon?: Component` | — | — | KPI card (label, big number, optional icon chip). |
 | **StatusBadge** | `label: string`, `tone?: Tone = 'neutral'`, `dot? = true` | — | — | Soft-tint status pill. `Tone = 'green'\|'red'\|'amber'\|'sky'\|'teal'\|'neutral'`. Map your domain status strings to a `Tone` with `toneFor()` — keep the status→tone map in your own app, not in the kit. |
 | **TagsInput** | `id?`, `suggestions?: string[]`, `placeholder?`, `modelValue: string[] = []` (v-model) | — | — | Chip input: Enter/comma adds, Backspace on empty draft pops the last tag, optional suggestion pills. |
-| **Textarea** | `id?`, `placeholder?`, `rows? = 4`, `required?`, `dir?: 'ltr'\|'rtl'`, `invalid?`, `modelValue: string \| number` (v-model) | — | — | Mirrors `Input`'s API and invalid-state styling. |
+| **Textarea** | `id?`, `placeholder?`, `rows? = 4`, `required?`, `disabled?`, `dir?: 'ltr'\|'rtl'`, `invalid?`, `modelValue: string \| number` (v-model) | — | — | Mirrors `Input`'s API and invalid-state styling. |
 | **Toaster** | — | — | — | Mount **once** per app (e.g. in your root layout). Calls `useToast().wireFlash()` internally to mirror server flash toasts. |
 | **Toggle** | `id?`, `modelValue: boolean = false` (v-model) | — | — | Switch (`role="switch"`), RTL-aware knob direction. |
 | **FilterBar** | — | default | — | Card row wrapper for filter controls (search input, selects) on index/report pages. |
@@ -66,6 +66,7 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | **Spinner** | `size?: 'sm'\|'md'\|'lg' = 'md'` | — | — | Standalone brand-colored spinner (the same one `Button`'s `loading` uses). |
 | **Tabs** | `tabs: { value: string; label: string }[]`, `modelValue: string` (v-model) | one named slot per `tab.value` | — | Underline tab bar; render each panel in a slot named after its `value`. |
 | **Tooltip** | `content?: string`, `side?: 'top'\|'right'\|'bottom'\|'left' = 'top'`, `delay? = 200` | default (trigger), `#content` | — | Hover/focus tooltip (reka-ui). Wrap the trigger in the default slot. |
+| **TranslatableField** | `name: string` (dotted path prefix), `errors?: Record<string,string>` (the **whole** `form.errors`), `locales?: (string \| { code; label?; dir? })[] = ['fr','ar']`, `label?`, `required? = false`, `requiredLocale?`, `layout?: 'tabs'\|'grid' = 'tabs'`, `multiline?`, `rows?`, `placeholder?`, `hint?`, `disabled?`, `id?`, `modelValue: Record<string,string>` (v-model) | — | — | One field for a multi-locale **JSON column**. Locale switching as tabs (or side-by-side `grid`); a tab whose locale has an error shows a red dot — essential, since reka-ui unmounts hidden panels. See **Translatable fields** below. |
 
 ### Charts (dependency-free SVG; default series color follows `--color-brand-500`)
 
@@ -236,6 +237,28 @@ The default orange is just a default. To ship a different brand color, or to whi
   // e.g. in your root layout setup:
   useBrandColor(usePage().props.branding?.brand_color); // no-op if absent
   ```
+
+## Translatable (multi-locale JSON) fields
+
+For a column that stores `{"fr": "…", "ar": "…"}`, use **one `TranslatableField`** — never a pair of hand-rolled `Input`s bound to `form.name.fr` / `form.name.ar`.
+
+```vue
+<TranslatableField
+    v-model="form.name"
+    name="name"
+    :label="t('category.name')"
+    :locales="['fr', 'ar', 'en']"
+    :errors="form.errors"
+    required
+    required-locale="fr"
+/>
+```
+
+- **`name` is a dotted path prefix**, not just a label. Errors resolve as `errors[`${name}.${locale}`]`, which is exactly what Laravel emits for `'name.fr' => ['required']`. Inside a `Repeater`, interpolate the runtime index: `` :name="`option_groups.${gi}.options.${oi}.name`" ``.
+- **`errors` takes the whole `form.errors` bag**, not a single message.
+- **JSON contract:** the component re-emits a new object containing **every** configured locale as a string (`''`, never null) on each keystroke, and preserves locales already on the value that aren't in `locales`. Inertia drops keys missing from the object, so this is what stops a locale silently vanishing from the JSON column. **Never `JSON.stringify` a translations object and never add `transform()`** — Inertia already sends a nested object, and with a file attached it serializes to `name[fr]`, which PHP re-parses into an array.
+- **`requiredLocale` defaults to the Inertia `locale` page prop**, i.e. the *viewer's* UI language. If your backend always requires one fixed locale (`'name.fr' => ['required']`), **pass it explicitly** — otherwise an Arabic-speaking admin sees the asterisk on `ar` while the server still rejects an empty `fr`.
+- `required` gates every required affordance, so omit it for fields the server marks `nullable`.
 
 ## Translation contract
 

@@ -46,6 +46,8 @@ export { default as Textarea } from './components/Textarea.vue';
 export { default as Toaster } from './components/Toaster.vue';
 export { default as Toggle } from './components/Toggle.vue';
 export { default as Tooltip } from './components/Tooltip.vue';
+export { default as TranslatableField } from './components/TranslatableField.vue';
+export type { TranslatableLocale, TranslatableValue } from './components/TranslatableField.vue';
 export { default as TrendChart } from './components/TrendChart.vue';
 
 // Composables
@@ -61,6 +63,7 @@ export type { BrandRamp } from './composables/useBrandColor';
 
 // Lib
 export { toneFor } from './lib/tone';
+export { dirForLocale } from './lib/locale';
 export type { Tone, Paginated, PaginatedMeta, PaginationLink, FlashToast, ToastType } from './lib/types';
 
 // reka-ui Dialog primitives — escape hatch for bespoke modals that don't fit

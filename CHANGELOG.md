@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0
+
+### Added
+
+- **`TranslatableField`** — one field for a multi-locale JSON column (`{"fr":"…","ar":"…"}`). Locale switching as **tabs** (or side-by-side `grid`), dotted error resolution (`errors['name.fr']`, including nested `option_groups.0.name.fr`), a **red dot on any tab whose locale has an error** (essential — reka-ui unmounts hidden panels, so those errors are otherwise invisible), required-locale marking, and a guaranteed submission shape: every configured locale key is always present as a string, unknown stored locales are preserved, and nothing is ever `JSON.stringify`d.
+- `dirForLocale(code)` — RTL detection by primary subtag (`ar-MA` → rtl), exported from `lib`.
+- `Tabs` gains a `#tab-label` scoped slot (`{ tab, active }`) so labels can carry badges/dots. Fully backwards-compatible — the fallback renders `tab.label` exactly as before.
+- `Input` and `Textarea` gain a styled `disabled` prop.
+
+### Note
+
+`requiredLocale` defaults to the Inertia `locale` page prop, which is the **viewer's UI language**. If your backend always requires one fixed locale, pass `required-locale="fr"` explicitly.
+
 ## 0.3.0
 
 ### Added

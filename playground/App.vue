@@ -4,8 +4,8 @@ import {
     Button, Card, StatusBadge, Alert, Spinner, Checkbox, RadioGroup, Toggle, Avatar,
     Tabs, Tooltip, Modal, Sheet, ConfirmDialog, Input, Select, Textarea, Label,
     StatCard, EmptyState, SegmentedControl, TagsInput, DataTable, SortableHeader,
-    DropdownMenu, DateField, DateRangeField, BarChart, HBarChart, DonutChart, TrendChart,
-    useBrandColor, type Tone, type DateRange,
+    DropdownMenu, DateField, DateRangeField, TranslatableField, BarChart, HBarChart, DonutChart, TrendChart,
+    useBrandColor, type Tone, type DateRange, type TranslatableValue,
 } from '@jibaleysolution/ui';
 import { Eye, Pencil, Trash2, ShoppingBag } from '@lucide/vue';
 
@@ -29,6 +29,13 @@ const tab = ref('one');
 const seg = ref('list');
 const date = ref('2026-07-24');
 const range = ref<DateRange>({ start: '2026-07-01', end: '2026-07-31' });
+
+// Translatable JSON field — the fake errors bag mimics a 422 from Laravel so the
+// red dot on the offending locale's tab is visible.
+const title = ref<TranslatableValue>({ fr: 'Pizza Margherita', ar: '' });
+const trErrors = { 'title.ar': 'هذا الحقل مطلوب' };
+const catName = ref<TranslatableValue>({ fr: '', ar: '', en: '' });
+const bio = ref<TranslatableValue>({ fr: '', ar: '' });
 const modalOpen = ref(false);
 const sheetOpen = ref(false);
 const confirmOpen = ref(false);
@@ -48,7 +55,7 @@ const menuItems = [
             <header class="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight">@jibaleysolution/ui</h1>
-                    <p class="mt-1 text-sm text-muted">Component playground · v0.2</p>
+                    <p class="mt-1 text-sm text-muted">Component playground · v0.4</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <Toggle v-model="rtl" /><span class="text-sm text-muted">RTL</span>
@@ -139,6 +146,44 @@ const menuItems = [
                         <div class="sm:col-span-2">
                             <Label>Tags</Label>
                             <TagsInput v-model="tags" :suggestions="['react', 'svelte']" />
+                        </div>
+                    </div>
+                </Card>
+            </section>
+
+            <!-- Translatable JSON field -->
+            <section class="space-y-3">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-muted">Translatable JSON field</h2>
+                <Card>
+                    <div class="space-y-6">
+                        <TranslatableField
+                            v-model="title"
+                            name="title"
+                            label="Titre (tabs — note the error dot on AR)"
+                            :errors="trErrors"
+                            required
+                            required-locale="fr"
+                        />
+                        <TranslatableField
+                            v-model="catName"
+                            name="name"
+                            label="Nom (grid, 3 locales)"
+                            layout="grid"
+                            :locales="['fr', 'ar', 'en']"
+                            required
+                            required-locale="fr"
+                        />
+                        <TranslatableField
+                            v-model="bio"
+                            name="bio"
+                            label="Description (multiline)"
+                            multiline
+                            :rows="3"
+                            hint="Stored as a single JSON column."
+                        />
+                        <div>
+                            <p class="mb-1 text-xs font-medium uppercase text-muted">Submitted JSON (every locale key always present)</p>
+                            <pre class="overflow-x-auto rounded-md bg-canvas p-3 font-mono text-xs text-ink" dir="ltr">{{ JSON.stringify({ title, name: catName, bio }, null, 2) }}</pre>
                         </div>
                     </div>
                 </Card>
