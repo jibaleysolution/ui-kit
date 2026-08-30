@@ -72,7 +72,7 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 
 | Component | Props | Notes |
 |---|---|---|
-| **BarChart** | `labels: string[]`, `data: number[]`, `color? = var(--color-brand-500)`, `accentPeak? = false` | Vertical bars; `accentPeak` reddens the tallest bar. |
+| **BarChart** | `labels: string[]`, `data: number[]`, `color? = var(--color-brand-500)`, `accentPeak? = false`, `maxTicks? = 7` | Vertical bars; `accentPeak` reddens the tallest bar. Past `maxTicks` labels, ticks thin to every Nth, anchored on the last label. |
 | **HBarChart** | `labels: string[]`, `data: number[]`, `format?: (v) => string\|number` | Horizontal ranked bars with a palette. |
 | **DonutChart** | `labels: string[]`, `data: number[]`, `donut? = true`, `format?` | Donut/pie with a legend. Set `donut=false` for a full pie. |
 | **TrendChart** | `series: { label: string; value: number }[]`, `title?: string` | Line + filled-area sparkline-style trend. |

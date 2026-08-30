@@ -49,7 +49,7 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | **Tabs** | `tabs: { value; label }[]`, `modelValue: string` (v-model) | one slot per `tab.value` | — | Underline tab bar; panel per named slot. |
 | **Tooltip** | `content?`, `side?: 'top'\|'right'\|'bottom'\|'left' = 'top'`, `delay? = 200` | default (trigger), `#content` | — | Hover/focus tooltip. |
 | **TranslatableField** | `name: string` (dotted path prefix), `errors?` (the whole `form.errors`), `locales? = ['fr','ar']`, `label?`, `required?`, `requiredLocale?`, `layout?: 'tabs'\|'grid' = 'tabs'`, `multiline?`, `rows?`, `placeholder?`, `hint?`, `disabled?`, `id?`, `modelValue: Record<string,string>` (v-model) | — | — | Multi-locale **JSON column** field: locale tabs (or `grid`), red dot on any tab whose locale has an error, always emits every locale key. Use instead of paired `Input`s. Pass `required-locale` explicitly when the backend pins one locale. |
-| **BarChart** | `labels: string[]`, `data: number[]`, `color? = brand`, `accentPeak? = false` | — | — | Vertical SVG bars. |
+| **BarChart** | `labels: string[]`, `data: number[]`, `color? = brand`, `accentPeak? = false`, `maxTicks? = 7` | — | — | Vertical bars; past `maxTicks` labels, ticks thin to every Nth (last label kept). |
 | **HBarChart** | `labels: string[]`, `data: number[]`, `format?` | — | — | Horizontal ranked bars. |
 | **DonutChart** | `labels: string[]`, `data: number[]`, `donut? = true`, `format?` | — | — | Donut/pie + legend. |
 | **TrendChart** | `series: { label; value }[]`, `title?` | — | — | Line + area trend. |

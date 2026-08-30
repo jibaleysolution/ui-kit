@@ -94,6 +94,52 @@ describe('BarChart', () => {
     it('renders a bar per label', () => {
         const w = mount(BarChart, { props: { labels: ['a', 'b', 'c'], data: [1, 2, 3] } });
         expect(w.findAll('span').filter((s) => ['a', 'b', 'c'].includes(s.text()))).toHaveLength(3);
+        expect(w.findAll('div[title]')).toHaveLength(3);
+    });
+
+    it('sizes bars proportionally to their values', () => {
+        const w = mount(BarChart, { props: { labels: ['a', 'b', 'c', 'd'], data: [2, 4, 1, 3] } });
+        const heights = w.findAll('div[title]').map((b) => (b.element as HTMLElement).style.height);
+        expect(heights).toEqual(['50%', '100%', '25%', '75%']);
+    });
+
+    it('stretches columns to the fixed row height so percentage bar heights resolve', () => {
+        // Regression: `items-end` on the row let columns collapse to their label's
+        // height, so the flex-1 bar area was 0px and `height: N%` rendered no bar.
+        const w = mount(BarChart, { props: { labels: ['a'], data: [3] } });
+        expect(w.classes()).toContain('h-56');
+        expect(w.classes()).not.toContain('items-end');
+        const column = w.find(':scope > div');
+        expect(column.classes()).toContain('flex-1');
+        expect(column.find('div').classes()).toContain('flex-1');
+    });
+
+    it('renders zero-height bars (not a misleading full chart) when every value is 0', () => {
+        const w = mount(BarChart, { props: { labels: ['a', 'b', 'c'], data: [0, 0, 0] } });
+        const heights = w.findAll('div[title]').map((b) => (b.element as HTMLElement).style.height);
+        expect(heights).toEqual(['0%', '0%', '0%']);
+    });
+
+    it('thins ticks past maxTicks, keeps the newest label, and lets columns shrink below label width', () => {
+        const labels = Array.from({ length: 14 }, (_, i) => `${String(i + 17).padStart(2, '0')}/08`);
+        const w = mount(BarChart, { props: { labels, data: labels.map((_, i) => i + 1) } });
+
+        // 14 labels / maxTicks 7 → every 2nd shown, anchored on the last (newest) label.
+        const spans = w.findAll('span');
+        expect(spans).toHaveLength(7);
+        expect(spans[spans.length - 1].text()).toBe('30/08');
+        expect(spans[0].text()).toBe('18/08');
+
+        // Every bar still renders even when its label is thinned away.
+        expect(w.findAll('div[title]')).toHaveLength(14);
+
+        // min-w-0 on every column: without it, nowrap labels set the columns'
+        // min-content width and 14 dates overflow a 375px-wide card.
+        const columns = w.findAll(':scope > div');
+        expect(columns).toHaveLength(14);
+        for (const column of columns) {
+            expect(column.classes()).toContain('min-w-0');
+        }
     });
 });
 

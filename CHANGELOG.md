@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.4.0
+## 0.4.1
+
+### Fixed
+
+- **`BarChart` rendered no bars at all.** `items-end` on the chart row let each column collapse to its label's height, so the flex-1 bar area was 0px tall and every percentage bar height computed to 0. Columns now stretch to the row's fixed height, so bars render at heights proportional to their values (and `accentPeak` still reddens the tallest).
+- **`BarChart` labels overflowed the card on narrow screens.** `whitespace-nowrap` labels set each column's min-content width, so 14 date labels pushed ~130px past a 375px-wide card. Columns now take `min-w-0`, and past `maxTicks` labels (new prop, default 7) ticks are thinned to every Nth, anchored on the last (newest) label — matching `TrendChart`. The `-rotate-45` mobile label hack is gone; rotation never reflowed the layout anyway.
+
+
 
 ### Added
 

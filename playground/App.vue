@@ -238,6 +238,18 @@ const menuItems = [
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-muted">Charts (follow brand color)</h2>
                 <div class="grid gap-6 sm:grid-cols-2">
                     <Card><BarChart :labels="['Mon', 'Tue', 'Wed', 'Thu', 'Fri']" :data="[4, 8, 5, 12, 7]" accent-peak /></Card>
+                    <Card>
+                        <!-- Dense series: 14 date labels must thin to ticks, not overflow the card, even at 375px. -->
+                        <BarChart
+                            :labels="Array.from({ length: 14 }, (_, i) => `${String(i + 17).padStart(2, '0')}/08`)"
+                            :data="[4, 0, 7, 2, 9, 5, 1, 12, 3, 6, 8, 2, 10, 4]"
+                            accent-peak
+                        />
+                    </Card>
+                    <Card>
+                        <!-- All-zero series: no bars, no misleading full-height chart. -->
+                        <BarChart :labels="['Mon', 'Tue', 'Wed']" :data="[0, 0, 0]" />
+                    </Card>
                     <Card><DonutChart :labels="['Cash', 'Card', 'Wallet']" :data="[40, 35, 25]" /></Card>
                     <Card><HBarChart :labels="['Pizza', 'Burger', 'Salad']" :data="[120, 90, 45]" /></Card>
                     <Card class="p-0"><TrendChart title="Orders (14d)" :series="[{ label: '1', value: 3 }, { label: '2', value: 6 }, { label: '3', value: 4 }, { label: '4', value: 9 }, { label: '5', value: 7 }, { label: '6', value: 12 }]" /></Card>
