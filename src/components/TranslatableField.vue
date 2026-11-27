@@ -5,6 +5,7 @@ import Label from './Label.vue';
 import Input from './Input.vue';
 import Textarea from './Textarea.vue';
 import FieldError from './FieldError.vue';
+import StatusBadge from './StatusBadge.vue';
 import Tabs from './Tabs.vue';
 import { dirForLocale } from '../lib/locale';
 
@@ -39,6 +40,28 @@ const props = withDefaults(
          */
         requiredLocale?: string;
         layout?: 'tabs' | 'grid';
+        /**
+         * The one locale to show, chosen by the parent: bind it with
+         * `v-model:active-locale` to a single language switch shared by every
+         * field on the page. When set, the field renders that locale's control
+         * only (no tab bar, no grid) and `layout` is ignored. A code that is
+         * not one of `locales` leaves the field on its `layout`, rather than
+         * showing a box for the wrong language.
+         */
+        activeLocale?: string;
+        /**
+         * The locale the others are translated from (e.g. `fr`). While another
+         * locale is shown, its value sits above the control as read-only text.
+         * Only applies when `activeLocale` is set.
+         */
+        referenceLocale?: string;
+        /**
+         * Text of the amber badge shown beside the label while the shown locale
+         * is not the reference one and has no text yet. The kit ships no copy
+         * for it: no label, no badge. Needs `referenceLocale`, and only applies
+         * when `activeLocale` is set.
+         */
+        missingLabel?: string;
         multiline?: boolean;
         rows?: number;
         placeholder?: string;
@@ -48,6 +71,14 @@ const props = withDefaults(
     }>(),
     { locales: () => ['fr', 'ar'], layout: 'tabs', required: false, multiline: false, disabled: false },
 );
+
+const emit = defineEmits<{
+    /**
+     * Only fired when `activeLocale` is set: a failed submit left an error on a
+     * locale that is not on screen, and the field asks the parent to show it.
+     */
+    'update:activeLocale': [locale: string];
+}>();
 
 const model = defineModel<TranslatableValue>({ default: () => ({}) });
 
@@ -116,11 +147,62 @@ function setValue(code: string, next: string) {
 
 const active = ref(normalized.value[0]?.code ?? '');
 
+/**
+ * Page-driven mode: the parent set `activeLocale`, and this is the locale it
+ * asked for. `null` means the prop is not set (or names a locale this field
+ * does not have), and `layout` decides as it always has.
+ */
+const shown = computed(() => normalized.value.find((locale) => locale.code === props.activeLocale) ?? null);
+
+/** The reference locale, while another locale is the one on screen. */
+const reference = computed(() => {
+    const code = props.referenceLocale;
+
+    if (!shown.value || !code || shown.value.code === code) {
+        return null;
+    }
+
+    return {
+        code: code.toUpperCase(),
+        dir: normalized.value.find((locale) => locale.code === code)?.dir ?? dirForLocale(code),
+        text: valueOf(code).trim(),
+    };
+});
+
+/** The amber badge's text, or '' when the shown locale is not waiting for a translation. */
+const missingBadge = computed(() =>
+    reference.value && shown.value && valueOf(shown.value.code).trim() === '' ? (props.missingLabel ?? '') : '',
+);
+
+/**
+ * Page-driven mode: errors on locales that are not on screen. There is no tab
+ * here to carry a red dot, so each one is named under the control instead.
+ */
+const hiddenErrors = computed(() => {
+    const code = shown.value?.code;
+
+    return code === undefined
+        ? []
+        : normalized.value.filter((locale) => locale.code !== code && errorFor(locale.code));
+});
+
 // After a failed submit, surface the first offending locale — but never yank the
-// user away from a tab that is itself showing an error.
+// user away from a locale that is itself showing an error. With tabs the field
+// switches tab on its own; in page-driven mode the parent owns the locale, so
+// the field can only ask for it.
 watch(
     () => normalized.value.map((locale) => (errorFor(locale.code) ? '1' : '0')).join(''),
     () => {
+        if (shown.value) {
+            const first = normalized.value.find((locale) => errorFor(locale.code))?.code;
+
+            if (first && !errorFor(shown.value.code)) {
+                emit('update:activeLocale', first);
+            }
+
+            return;
+        }
+
         if (!errorFor(active.value)) {
             active.value = normalized.value.find((locale) => errorFor(locale.code))?.code ?? active.value;
         }
@@ -138,15 +220,63 @@ const gridCols = computed(() =>
 
 <template>
     <div>
-        <Label v-if="label" :for="idFor(layout === 'tabs' ? active : normalized[0]?.code ?? '')">
+        <Label v-if="label && !shown" :for="idFor(layout === 'tabs' ? active : normalized[0]?.code ?? '')">
             {{ label }}
             <span v-if="required" class="text-brand-500">*</span>
         </Label>
 
+        <!-- Page-driven: the parent's language switch picks the one locale on
+             screen, so one click changes the language of every field. -->
+        <template v-if="shown">
+            <!-- Label and badge carry the same bottom margin, so centring the
+                 row lines the two up whatever the label's height. -->
+            <div v-if="label || missingBadge" class="flex items-center justify-between gap-3">
+                <Label v-if="label" :for="idFor(shown.code)">
+                    {{ label }}
+                    <span v-if="required && shown.code === requiredCode" class="text-brand-500">*</span>
+                </Label>
+                <StatusBadge v-if="missingBadge" :label="missingBadge" tone="amber" class="mb-1.5 shrink-0" />
+            </div>
+
+            <!-- The text to translate from. -->
+            <p
+                v-if="reference?.text"
+                class="mb-1.5 flex gap-2 rounded-md bg-canvas px-3 py-2 text-xs leading-relaxed text-muted"
+            >
+                <span class="font-semibold text-ink">{{ reference.code }}</span>
+                <span :dir="reference.dir" class="min-w-0 whitespace-pre-line break-words">{{ reference.text }}</span>
+            </p>
+
+            <!-- Keyed by locale: each language gets its own element, as with the
+                 tabs, so undo history and validity never leak across locales. -->
+            <component
+                :is="multiline ? Textarea : Input"
+                :id="idFor(shown.code)"
+                :key="shown.code"
+                :model-value="valueOf(shown.code)"
+                :dir="shown.dir"
+                :rows="multiline ? rows : undefined"
+                :placeholder="placeholder"
+                :required="required && shown.code === requiredCode"
+                :disabled="disabled"
+                :invalid="!!errorFor(shown.code)"
+                @update:model-value="setValue(shown.code, String($event ?? ''))"
+            />
+            <FieldError :message="errorFor(shown.code)" />
+
+            <!-- An error on a locale that is not shown must never be invisible:
+                 the parent may not follow `update:activeLocale`, and one switch
+                 cannot show two languages at once. -->
+            <p v-for="locale in hiddenErrors" :key="locale.code" class="mt-1.5 flex gap-2 text-sm text-red-600">
+                <span class="font-semibold">{{ locale.label }}</span>
+                <span>{{ errorFor(locale.code) }}</span>
+            </p>
+        </template>
+
         <!-- Tabs: one locale visible at a time. reka-ui unmounts inactive panels,
              so an error on a hidden locale is invisible without the dot below —
              and an HTML `required` on a hidden input can't block submission. -->
-        <Tabs v-if="layout === 'tabs'" v-model="active" :tabs="tabItems">
+        <Tabs v-else-if="layout === 'tabs'" v-model="active" :tabs="tabItems">
             <template #tab-label="{ tab }">
                 <span :class="errorFor(tab.value) ? 'text-red-600' : ''">{{ tab.label }}</span>
                 <span v-if="required && tab.value === requiredCode" class="text-brand-500" aria-hidden="true">*</span>

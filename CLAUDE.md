@@ -66,7 +66,7 @@ Import style: `import { Button, DataTable, useToast } from '@jibaleysolution/ui'
 | **Spinner** | `size?: 'sm'\|'md'\|'lg' = 'md'` | — | — | Standalone brand-colored spinner (the same one `Button`'s `loading` uses). |
 | **Tabs** | `tabs: { value: string; label: string }[]`, `modelValue: string` (v-model) | one named slot per `tab.value` | — | Underline tab bar; render each panel in a slot named after its `value`. |
 | **Tooltip** | `content?: string`, `side?: 'top'\|'right'\|'bottom'\|'left' = 'top'`, `delay? = 200` | default (trigger), `#content` | — | Hover/focus tooltip (reka-ui). Wrap the trigger in the default slot. |
-| **TranslatableField** | `name: string` (dotted path prefix), `errors?: Record<string,string>` (the **whole** `form.errors`), `locales?: (string \| { code; label?; dir? })[] = ['fr','ar']`, `label?`, `required? = false`, `requiredLocale?`, `layout?: 'tabs'\|'grid' = 'tabs'`, `multiline?`, `rows?`, `placeholder?`, `hint?`, `disabled?`, `id?`, `modelValue: Record<string,string>` (v-model) | — | — | One field for a multi-locale **JSON column**. Locale switching as tabs (or side-by-side `grid`); a tab whose locale has an error shows a red dot — essential, since reka-ui unmounts hidden panels. See **Translatable fields** below. |
+| **TranslatableField** | `name: string` (dotted path prefix), `errors?: Record<string,string>` (the **whole** `form.errors`), `locales?: (string \| { code; label?; dir? })[] = ['fr','ar']`, `label?`, `required? = false`, `requiredLocale?`, `layout?: 'tabs'\|'grid' = 'tabs'`, `activeLocale?: string` (`v-model:active-locale`), `referenceLocale?: string`, `missingLabel?: string`, `multiline?`, `rows?`, `placeholder?`, `hint?`, `disabled?`, `id?`, `modelValue: Record<string,string>` (v-model) | — | `update:activeLocale: [locale: string]` | One field for a multi-locale **JSON column**. Locale switching as tabs (or side-by-side `grid`); a tab whose locale has an error shows a red dot — essential, since reka-ui unmounts hidden panels. Or hand the switch to the page: with `activeLocale` set the field shows that one locale only (no tabs, no grid), so a single `SegmentedControl` drives every field, with the `referenceLocale` text above the box and a `missingLabel` badge while a translation is empty. See **Translatable fields** below. |
 
 ### Charts (dependency-free SVG; default series color follows `--color-brand-500`)
 
@@ -259,6 +259,44 @@ For a column that stores `{"fr": "…", "ar": "…"}`, use **one `TranslatableFi
 - **JSON contract:** the component re-emits a new object containing **every** configured locale as a string (`''`, never null) on each keystroke, and preserves locales already on the value that aren't in `locales`. Inertia drops keys missing from the object, so this is what stops a locale silently vanishing from the JSON column. **Never `JSON.stringify` a translations object and never add `transform()`** — Inertia already sends a nested object, and with a file attached it serializes to `name[fr]`, which PHP re-parses into an array.
 - **`requiredLocale` defaults to the Inertia `locale` page prop**, i.e. the *viewer's* UI language. If your backend always requires one fixed locale (`'name.fr' => ['required']`), **pass it explicitly** — otherwise an Arabic-speaking admin sees the asterisk on `ar` while the server still rejects an empty `fr`.
 - `required` gates every required affordance, so omit it for fields the server marks `nullable`.
+
+### One language switch for the whole page
+
+On a page where every text is translatable, per-field tabs cost one click per field to check a single language. Give the page **one** switch and bind every field to it with `v-model:active-locale`:
+
+```vue
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import { SegmentedControl, TranslatableField } from '@jibaleysolution/ui';
+
+const lang = ref('fr');
+const form = useForm({ title: { fr: '', en: '', ar: '' }, lead: { fr: '', en: '', ar: '' } });
+// The props every field on the page shares.
+const field = computed(() => ({
+    locales: ['fr', 'en', 'ar'],
+    errors: form.errors,
+    referenceLocale: 'fr',
+    requiredLocale: 'fr',
+    missingLabel: t('editor.to_translate'),
+}));
+</script>
+
+<template>
+    <SegmentedControl v-model="lang" :segments="[{ value: 'fr', label: 'Français' }, { value: 'en', label: 'English' }, { value: 'ar', label: 'العربية' }]" />
+
+    <TranslatableField v-model="form.title" v-model:active-locale="lang" name="title" :label="t('page.title')" required v-bind="field" />
+    <TranslatableField v-model="form.lead" v-model:active-locale="lang" name="lead" :label="t('page.lead')" multiline v-bind="field" />
+</template>
+```
+
+- **`activeLocale`** (`v-model:active-locale`) — when set, the field renders only that locale's control (the same `Input`/`Textarea`, with the locale's `dir`): no tab bar, no grid, and `layout` is ignored. The label's asterisk shows only while the shown locale is the required one. Leave it unset and `layout` behaves exactly as before. If the code is not one of the field's `locales`, the field stays on its `layout` (its own tabs) rather than showing a box for the wrong language.
+- **`referenceLocale`** — the locale the others are translated from. While another locale is shown and the reference has text, that text sits above the control, read-only, with the locale code in front (`FR  Le titre…`).
+- **`missingLabel`** — text of the amber `StatusBadge` shown beside the label while the shown locale is not the reference one and is still empty. The kit ships **no copy** for it: pass your own translated string, or omit it for no badge. Needs `referenceLocale`.
+- **Errors are never invisible.** After a failed submit, a field whose error sits on a locale that is not shown emits `update:activeLocale` with its first locale in error, so the bound switch moves there — unless the shown locale has an error of its own on that field (same rule as the tabs: never pull the user away from an error they are looking at). Any error still on a locale that is not on screen is printed in red under the control, with that locale's label in front. This covers a page that passes `:active-locale` one-way, and a page where two fields fail in different languages: one switch can only land on one of them (the last field that asked), and the other fields name theirs.
+- **Your own rule for the switch** — bind `:active-locale="lang"` and handle `@update:active-locale` yourself instead of `v-model`, e.g. to stay put while anything on screen is in error. The red line under each field keeps every error visible either way.
+- `referenceLocale` and `missingLabel` only apply with `activeLocale`; the `tabs` and `grid` layouts ignore them.
+- The **JSON contract is the same** in this mode: each write re-emits a new object holding every configured locale as a string, and preserves locales that are not configured.
 
 ## Translation contract
 

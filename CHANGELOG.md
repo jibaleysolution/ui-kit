@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0
+
+### Added
+
+- **`TranslatableField` can follow one language switch for the whole page.** New optional `activeLocale` prop (`v-model:active-locale`): when set, the field renders only that locale's control — no tab bar, no grid — so a single `SegmentedControl` changes the language of every field at once, instead of one click per field. The label's required asterisk then shows only while the shown locale is the required one.
+- **`referenceLocale`** — while another locale is shown, the reference text (e.g. the French) sits above the control as read-only text to translate from, with the locale code in front.
+- **`missingLabel`** — an amber `StatusBadge` beside the label while the shown translation is empty. The kit ships no copy for it: no label, no badge.
+- **Errors stay visible without tabs.** After a failed submit the field emits `update:activeLocale` with its first locale in error (never away from a locale that itself shows one, the rule the tabs already follow), and any error left on a locale that is not on screen is named in red under the control — which also covers a parent that binds `:active-locale` one-way, and two fields failing in different languages under one switch.
+- Playground: a "one language switch for the page" example, with a simulated failed save.
+
+### Unchanged
+
+- Without `activeLocale`, `layout="tabs"` and `layout="grid"` render and behave exactly as in 0.4.x. The JSON contract is the same in every mode: each write re-emits every configured locale as a string and preserves locales that are not configured.
+
 ## 0.4.1
 
 ### Fixed

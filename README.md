@@ -40,6 +40,27 @@ import { Button, Card, StatusBadge } from '@jibaleysolution/ui';
 </template>
 ```
 
+## Translatable fields
+
+`TranslatableField` edits a multi-locale JSON column (`{"fr":"…","en":"…","ar":"…"}`) as one field. It can switch locale with its own tabs, show every locale side by side (`layout="grid"`), or, on a page where every text is translatable, follow **one language switch for the whole page**:
+
+```vue
+<SegmentedControl v-model="lang" :segments="languages" />
+
+<TranslatableField
+    v-model="form.title"
+    v-model:active-locale="lang"
+    name="title"
+    label="Title"
+    :locales="['fr', 'en', 'ar']"
+    :errors="form.errors"
+    reference-locale="fr"
+    missing-label="To translate"
+/>
+```
+
+Under English or Arabic the French text sits above the box as the text to translate from, with an amber badge while the translation is empty. After a failed save the switch moves to the language in error, and an error on a language that is not on screen is named in red under the field. See [AGENTS.md](./AGENTS.md#translatable-multi-locale-json-fields) for the full contract.
+
 ## Set up AI-agent discovery (recommended)
 
 ```bash

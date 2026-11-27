@@ -226,6 +226,52 @@ Laravel validates `option_groups.*.name.fr`, and errors come back with concrete 
 </Repeater>
 ```
 
+### One language switch for a whole page
+
+When a page has many translatable fields, do not give each one its own tabs. Put **one** `SegmentedControl` at the top and bind every field to it with `v-model:active-locale`; each field then shows that one language only:
+
+```vue
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import { SegmentedControl, TranslatableField, Button } from '@jibaleysolution/ui';
+
+const lang = ref('fr');
+const form = useForm({
+    title: { fr: '', en: '', ar: '' },
+    lead: { fr: '', en: '', ar: '' },
+    cta: { fr: '', en: '', ar: '' },
+});
+// The props every field on the page shares.
+const field = computed(() => ({
+    locales: ['fr', 'en', 'ar'],
+    errors: form.errors,
+    referenceLocale: 'fr',
+    requiredLocale: 'fr',
+    missingLabel: t('editor.to_translate'),
+}));
+</script>
+
+<template>
+    <SegmentedControl
+        v-model="lang"
+        :segments="[{ value: 'fr', label: 'Français' }, { value: 'en', label: 'English' }, { value: 'ar', label: 'العربية' }]"
+    />
+
+    <form class="space-y-5" @submit.prevent="form.post(route('admin.pages.store'))">
+        <TranslatableField v-model="form.title" v-model:active-locale="lang" name="title" label="Titre" required v-bind="field" />
+        <TranslatableField v-model="form.lead" v-model:active-locale="lang" name="lead" label="Introduction" multiline v-bind="field" />
+        <TranslatableField v-model="form.cta" v-model:active-locale="lang" name="cta" label="Bouton" v-bind="field" />
+        <Button type="submit" variant="primary" :loading="form.processing">Enregistrer</Button>
+    </form>
+</template>
+```
+
+- Under English or Arabic each field shows the French (`reference-locale`) above its box as the text to translate from, and the amber `missing-label` badge while that translation is empty. The badge text is yours — the kit has no built-in copy.
+- After a failed save the switch moves by itself to the language in error. If two fields fail in different languages the switch lands on one, and the other fields print theirs in red under the box (`AR  The text is too long.`), so nothing is ever hidden.
+- Keep `v-model:active-locale` (two-way). With a one-way `:active-locale` the switch cannot follow an error; the red line is then the only signal.
+- The submitted JSON is the same as with tabs: every locale key present, as a string.
+
 ## Decision: Modal vs. ConfirmDialog vs. raw Dialog primitives
 
 - **Deleting/destructive/simple yes-no** → `ConfirmDialog` (built-in Cancel/Confirm, `tone="danger"`).

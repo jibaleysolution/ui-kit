@@ -1,10 +1,10 @@
 # @jibaleysolution/ui
 
-> Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel component kit shared across the Jibaley ecosystem apps (jakil, jibaley-api, kitchen). Ships 47 components, 6 composables, and design tokens so admin-panel UI (cards, tables, badges, forms, modals, dialogs, dropdowns, tabs, sheets, tooltips, translatable JSON fields, charts, pagination, toasts) is imported, not rewritten. Re-brandable at build time or per-tenant at runtime via useBrandColor().
+> Vue 3 + Inertia + reka-ui + Tailwind 4 admin-panel component kit shared across the Jibaley ecosystem apps (jakil, jibaley-api, kitchen). Ships 47 components, 6 composables, and design tokens so admin-panel UI (cards, tables, badges, forms, modals, dialogs, dropdowns, tabs, sheets, tooltips, translatable JSON fields with per-field tabs or one page-level language switch, charts, pagination, toasts) is imported, not rewritten. Re-brandable at build time or per-tenant at runtime via useBrandColor().
 
 ## Docs
 
-- [AGENTS.md](./AGENTS.md): full component catalog, props/slots/emits, composition recipes, theming and RTL rules, translation contract. Byte-identical to CLAUDE.md. Read this first.
+- [AGENTS.md](./AGENTS.md): full component catalog, props/slots/emits, composition recipes, theming and RTL rules, translatable fields (TranslatableField: tabs, grid, or `v-model:active-locale` for one language switch per page, with `referenceLocale` and `missingLabel`), translation contract. Byte-identical to CLAUDE.md. Read this first.
 - [skills/jibaley-ui/SKILL.md](./skills/jibaley-ui/SKILL.md): AI-agent skill — when to apply, import cheatsheet, common pitfalls.
 - [skills/jibaley-ui/references/components.md](./skills/jibaley-ui/references/components.md): the same full component/composable reference as AGENTS.md, standalone.
 - [skills/jibaley-ui/references/recipes.md](./skills/jibaley-ui/references/recipes.md): complete runnable page examples (index page, form page, modal, toast wiring).

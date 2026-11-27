@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import {
     Button, Card, StatusBadge, Alert, Spinner, Checkbox, RadioGroup, Toggle, Avatar,
     Tabs, Tooltip, Modal, Sheet, ConfirmDialog, Input, Select, Textarea, Label,
@@ -36,6 +36,42 @@ const title = ref<TranslatableValue>({ fr: 'Pizza Margherita', ar: '' });
 const trErrors = { 'title.ar': 'هذا الحقل مطلوب' };
 const catName = ref<TranslatableValue>({ fr: '', ar: '', en: '' });
 const bio = ref<TranslatableValue>({ fr: '', ar: '' });
+
+// One language switch for the whole page: a single SegmentedControl drives every
+// field through `v-model:active-locale`. French is the reference, so English and
+// Arabic show it above the box, with an amber mark while they are still empty.
+const pageLocales = [
+    { code: 'fr', label: 'Français' },
+    { code: 'en', label: 'English' },
+    { code: 'ar', label: 'العربية' },
+];
+const pageLang = ref('fr');
+const hero = ref<Record<'title' | 'lead' | 'cta', TranslatableValue>>({
+    title: { fr: 'Vos repas livrés en trente minutes', en: '', ar: '' },
+    lead: {
+        fr: 'Commandez auprès des restaurants du quartier et suivez votre livreur en direct.',
+        en: 'Order from the restaurants around you and follow your courier live.',
+        ar: '',
+    },
+    cta: { fr: 'Commander', en: 'Order now', ar: 'اطلب الآن' },
+});
+const pageErrors = ref<Record<string, string>>({});
+// What a 422 would bring back: errors in two languages at once (the messages
+// follow the admin's own language, here French). The switch can only land on one
+// of them; the other is named in red under its own field.
+function failSave() {
+    pageErrors.value = {
+        'hero.title.fr': 'Le titre ne peut pas dépasser 30 caractères.',
+        'hero.cta.ar': 'Le texte du bouton ne peut pas dépasser 8 caractères.',
+    };
+}
+const pageField = computed(() => ({
+    locales: pageLocales,
+    errors: pageErrors.value,
+    referenceLocale: 'fr',
+    requiredLocale: 'fr',
+    missingLabel: 'À traduire',
+}));
 const modalOpen = ref(false);
 const sheetOpen = ref(false);
 const confirmOpen = ref(false);
@@ -55,7 +91,7 @@ const menuItems = [
             <header class="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight">@jibaleysolution/ui</h1>
-                    <p class="mt-1 text-sm text-muted">Component playground · v0.4</p>
+                    <p class="mt-1 text-sm text-muted">Component playground · v0.5</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <Toggle v-model="rtl" /><span class="text-sm text-muted">RTL</span>
@@ -184,6 +220,57 @@ const menuItems = [
                         <div>
                             <p class="mb-1 text-xs font-medium uppercase text-muted">Submitted JSON (every locale key always present)</p>
                             <pre class="overflow-x-auto rounded-md bg-canvas p-3 font-mono text-xs text-ink" dir="ltr">{{ JSON.stringify({ title, name: catName, bio }, null, 2) }}</pre>
+                        </div>
+                    </div>
+                </Card>
+            </section>
+
+            <!-- Translatable fields under one page-level language switch -->
+            <section class="space-y-3">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-muted">Translatable fields · one language switch for the page</h2>
+                <Card>
+                    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="text-sm font-medium text-ink">Working language</span>
+                            <SegmentedControl
+                                v-model="pageLang"
+                                :segments="pageLocales.map((locale) => ({ value: locale.code, label: locale.label }))"
+                            />
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <Button size="sm" variant="outline" @click="failSave">Simulate a failed save</Button>
+                            <Button size="sm" variant="ghost" @click="pageErrors = {}">Clear errors</Button>
+                        </div>
+                    </div>
+                    <div class="space-y-5">
+                        <TranslatableField
+                            v-model="hero.title"
+                            v-model:active-locale="pageLang"
+                            name="hero.title"
+                            label="Titre"
+                            required
+                            v-bind="pageField"
+                        />
+                        <TranslatableField
+                            v-model="hero.lead"
+                            v-model:active-locale="pageLang"
+                            name="hero.lead"
+                            label="Introduction"
+                            multiline
+                            :rows="3"
+                            v-bind="pageField"
+                        />
+                        <TranslatableField
+                            v-model="hero.cta"
+                            v-model:active-locale="pageLang"
+                            name="hero.cta"
+                            label="Bouton"
+                            hint="One switch, three fields: no per-field tabs."
+                            v-bind="pageField"
+                        />
+                        <div>
+                            <p class="mb-1 text-xs font-medium uppercase text-muted">Submitted JSON (same contract: every locale key always present)</p>
+                            <pre class="overflow-x-auto rounded-md bg-canvas p-3 font-mono text-xs text-ink" dir="ltr">{{ JSON.stringify({ hero }, null, 2) }}</pre>
                         </div>
                     </div>
                 </Card>
