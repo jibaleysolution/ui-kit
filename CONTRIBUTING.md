@@ -47,6 +47,10 @@ git push --follow-tags
 
 The pushed `v*.*.*` tag triggers the **Publish** workflow, which runs the full quality gate (`prepublishOnly`) and publishes to npm. Pushes that touch `src/`, `theme.css`, or `playground/` redeploy the [live playground](https://jibaleysolution.github.io/ui-kit/). Update `CHANGELOG.md` with each release.
 
+- **No npm token.** Publishing uses npm [trusted publishing](https://docs.npmjs.com/trusted-publishers): npm trusts `.github/workflows/publish.yml` in this repository, and adds a provenance statement to each version. The one-time setting lives on npmjs.com, in the package's Settings → Trusted publishing → GitHub Actions: organization `jibaleysolution`, repository `ui-kit`, workflow filename `publish.yml`, no environment, npm publish allowed. Renaming the workflow file or the repository stops publishing until that setting is updated.
+- **Version already bumped by hand?** `npm version` would bump it again. Tag it yourself (`git tag -a vX.Y.Z -m "X.Y.Z"`), then push with `--follow-tags`. The workflow refuses a tag that does not match `package.json`.
+- **Tagged but not on npm** (a publish that failed): run the workflow by hand from `master` with `gh workflow run publish.yml --repo jibaleysolution/ui-kit --ref master`. It refuses unless the tag exists and `master` still ships the same package as the tag.
+
 ## Questions / security
 
 General questions and security reports: **engineering@jibaley.com** (see [SECURITY.md](./SECURITY.md)). Please don't file public issues for vulnerabilities.

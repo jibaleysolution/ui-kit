@@ -1,31 +1,69 @@
 name: Publish
 
-# Publishes to npm when a version tag is pushed:
-#   npm version patch   # bumps package.json + creates the tag
+# Publishes @jibaleysolution/ui to npm when a version tag is pushed:
+#   npm version minor        # bumps package.json and creates the tag
 #   git push --follow-tags
 #
-# Requires a repo secret NPM_TOKEN — a granular npm access token with
-# "bypass 2FA" enabled and write access to the @jibaleysolution scope.
-# Add it once:  gh secret set NPM_TOKEN   (paste the token when prompted)
+# Authentication is npm trusted publishing (OIDC): npm trusts this workflow
+# file in this repository, so no npm token is stored anywhere, and npm adds a
+# provenance statement to every version. npm is retiring token-based CI
+# publishing (2FA-bypass tokens, 2026), so do not go back to a token secret.
 #
-# prepublishOnly (typecheck + test + build) runs automatically before publish,
-# so a broken build never ships.
+# One-time setting on npmjs.com, package Settings -> Trusted publishing ->
+# GitHub Actions: organization `jibaleysolution`, repository `ui-kit`,
+# workflow filename `publish.yml`, no environment, npm publish allowed.
+# npm only checks these values when a publish runs: renaming this file or the
+# repository stops publishing until the setting is updated.
+#
+# A version that is tagged but not on npm yet (after a failed run, say) is
+# published by running this workflow by hand from master:
+#   gh workflow run publish.yml --repo jibaleysolution/ui-kit --ref master
+# It refuses unless the tag exists and master still ships the same package.
+#
+# prepublishOnly (typecheck + test + build) runs before the upload, so a
+# broken build never ships.
 
 on:
   push:
     tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # trusted publishing: lets npm verify this run
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
         with:
-          node-version: 20
+          fetch-depth: 0 # tags too, for the manual-run check below
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-          cache: npm
+          package-manager-cache: false # never a cache in a release build
+      - name: Check npm supports trusted publishing
+        run: |
+          echo "npm $(npm --version)"
+          node -e "const [a, b, c] = process.argv[1].split('.').map(Number); process.exit(a > 11 || (a === 11 && (b > 5 || (b === 5 && c >= 1))) ? 0 : 1)" "$(npm --version)" \
+            || { echo "::error::Trusted publishing needs npm 11.5.1 or newer."; exit 1; }
+      - name: Check the tag matches the package
+        run: |
+          tag="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF_NAME" != "$tag" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json ($tag)."
+            exit 1
+          fi
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            [ "$GITHUB_REF" = refs/heads/master ] \
+              || { echo "::error::Run this workflow by hand from master only."; exit 1; }
+            git rev-parse --verify --quiet "refs/tags/$tag" > /dev/null \
+              || { echo "::error::No tag $tag. Tag the release first."; exit 1; }
+            git diff --quiet "$tag" HEAD -- . ':(exclude).github' ':(exclude)playground' ':(exclude)tests' \
+              ':(exclude)CHANGELOG.md' ':(exclude)CONTRIBUTING.md' ':(exclude)SECURITY.md' \
+              || { echo "::error::master ships a different package from $tag. Bump the version and tag it."; exit 1; }
+          fi
       - run: npm ci
       - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
